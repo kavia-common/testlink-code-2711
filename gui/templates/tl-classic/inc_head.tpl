@@ -38,6 +38,15 @@ editorType: used to understand if code for tinymce need to be loaded
 {* ----- load javascripts libraries -------------------------------------------------- *} 
 	<script type="text/javascript" src="{$basehref}gui/javascript/testlink_library.js" language="javascript"></script>
 	<script type="text/javascript" src="{$basehref}gui/javascript/test_automation.js" language="javascript"></script>
+
+	{* Idle session warning (post-login pages only; login page uses a different template) *}
+	<script type="text/javascript">
+	//<!--
+	// Optional override point. If not set, idle-warning.js will use <base href> to compute defaults.
+	// window.TL_IDLE_CONFIG = window.TL_IDLE_CONFIG || {};
+	//-->
+	</script>
+	<script type="text/javascript" src="{$basehref}lib/javascript/idle-warning.js"></script>
 	
 	{if $jsValidate == "yes"} 
 	<script type="text/javascript" src="{$basehref}gui/javascript/validate.js" language="javascript"></script>
