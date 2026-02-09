@@ -42,8 +42,12 @@ editorType: used to understand if code for tinymce need to be loaded
 	{* Idle session warning (post-login pages only; login page uses a different template) *}
 	<script type="text/javascript">
 	//<!--
-	// Optional override point. If not set, idle-warning.js will use <base href> to compute defaults.
-	// window.TL_IDLE_CONFIG = window.TL_IDLE_CONFIG || {};
+	/**
+	 * Provide server-side timeout to client as a fallback if ajaxcheck does not provide a numeric timeout.
+	 * This must reflect config 'sessionInactivityTimeout' (seconds).
+	 */
+	window.TL_IDLE_CONFIG = window.TL_IDLE_CONFIG || {};
+	window.TL_IDLE_CONFIG.sessionInactivityTimeoutSec = {config_get('sessionInactivityTimeout')|intval};
 	//-->
 	</script>
 	<script type="text/javascript" src="{$basehref}lib/javascript/idle-warning.js"></script>
