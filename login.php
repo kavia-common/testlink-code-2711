@@ -464,14 +464,40 @@ function authorizePostProcessing($argsObj,$op) {
  *
  */
 function processAjaxCheck(&$dbHandler) {
-   // Send a json reply, include localized strings for use in js to display a login form.
-   doSessionStart(true);
-   echo json_encode(array('validSession' => checkSessionValid($dbHandler, false),
-                        'username_label' => lang_get('login_name'),
-                        'password_label' => lang_get('password'),
-                        'login_label' => lang_get('btn_login'),
-                          'timeout_info' => lang_get('timeout_info')));
+  // Send a JSON reply, include localized strings for use in JS to display a login form.
+  //
+  // IMPORTANT:
+  // - This endpoint is used by idle-warning.js on authenticated pages.
+  // - It must never redirect or output HTML, otherwise the fetch() JSON parser will fail.
+  // - It must ensure DB connection exists before calling checkSessionValid(), because that
+  //   function refreshes $_SESSION['currentUser'] from DB.
+  doSessionStart(true);
 
+  // Ensure JSON response and prevent caches/proxies from storing it.
+  header('Content-Type: application/json; charset=UTF-8');
+  header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+  header('Pragma: no-cache');
+
+  // Be defensive: if for any reason DB handler is not initialized/connected, connect now.
+  // login.php normally calls doDBConnect() earlier, but ajaxcheck calls should be robust.
+  if (!is_object($dbHandler)) {
+    doDBConnect($dbHandler, database::ONERROREXIT);
+  }
+
+  $valid = checkSessionValid($dbHandler, false);
+  if (!$valid) {
+    // Distinguish invalid/expired sessions at HTTP level for consumers.
+    http_response_code(401);
+  }
+
+  echo json_encode(array(
+    'validSession' => $valid,
+    'username_label' => lang_get('login_name'),
+    'password_label' => lang_get('password'),
+    'login_label' => lang_get('btn_login'),
+    'timeout_info' => lang_get('timeout_info')
+  ));
+  exit;
 }
 
 
